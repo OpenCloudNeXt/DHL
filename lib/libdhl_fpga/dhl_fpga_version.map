@@ -1,0 +1,8 @@
+dhl_1.0 {
+	global:
+	
+	dhl_fpga_dev_count;
+	dhl_fpga_dev_is_valid_card;
+	
+	local: *;
+};

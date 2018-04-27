@@ -1,0 +1,4 @@
+!.gitignore
+fpga-hello/
+helloworld/
+test-fppga/

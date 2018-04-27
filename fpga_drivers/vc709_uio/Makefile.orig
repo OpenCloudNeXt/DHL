@@ -1,0 +1,15 @@
+obj-m := vc709_uio.o
+
+KERNELDIR=/lib/modules/$(shell uname -r)/build
+
+all:
+	$(MAKE) $(CFLAGS) -C $(KERNELDIR) M=$(PWD) modules 
+
+clean:
+	rm -rf *~ *.o *.ko *.mod* *.order *.mar* *.sym* .*.cmd .tmp_versions
+
+insert:
+	insmod vc709_uio.ko
+	
+remove:
+	rmmod vc709_uio.ko
