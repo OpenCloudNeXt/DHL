@@ -101,7 +101,7 @@ extern "C" {
 
 	/***************************** Include Files *********************************/
 
-#include "../../../fpga_drivers/xilinx_vc709/dma/xio.h"
+#include "xio.h"
 
 	/************************** Constant Definitions *****************************/
 

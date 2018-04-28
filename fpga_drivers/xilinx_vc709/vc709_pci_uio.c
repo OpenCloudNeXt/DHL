@@ -4,7 +4,6 @@
  *  Created on: Jul 3, 2017
  *      Author: root
  */
-#include "../../fpga_drivers/xilinx_vc709/vc709_pci_uio.h"
 
 #include <string.h>
 #include <unistd.h>
@@ -25,9 +24,9 @@
 
 #include <dhl_fpga.h>
 
-#include "../../fpga_driver/xilinx_vc709/vc709_fpga.h"
-#include "../../fpga_drivers/xilinx_vc709/vc709_log.h"
-
+#include "vc709_fpga.h"
+#include "vc709_log.h"
+#include "vc709_pci_uio.h"
 
 extern void *pci_map_addr;
 

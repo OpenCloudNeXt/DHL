@@ -8,8 +8,8 @@
 #ifndef VC709_FPGA_H_
 #define VC709_FPGA_H_
 
-#include "../../fpga_driver/xilinx_vc709/vc709_type.h"
-#include "../../fpga_drivers/xilinx_vc709/dma/xdma.h"
+#include "vc709_type.h"
+#include "dma/xdma.h"
 
 #define PCI_VENDOR_ID_DMA   0x10EE      /**< Vendor ID - Xilinx */
 #define PCI_DEVICE_ID_DMA   0x7083      /**< Xilinx's Device ID */

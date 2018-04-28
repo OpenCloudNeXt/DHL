@@ -9,8 +9,8 @@
 #define VC709_RXTX_H_
 
 /* for Dma_Bd struct */
-#include "../../fpga_driver/xilinx_vc709/dma/xdma.h"
-#include "../../fpga_driver/xilinx_vc709/dma/xdma_bd.h"
+#include "dma/xdma.h"
+#include "dma/xdma_bd.h"
 
 /*
  * Rings setup and release.

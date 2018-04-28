@@ -8,7 +8,7 @@
 #ifndef VC709_PCI_UIO_H_
 #define VC709_PCI_UIO_H_
 
-#include "../../fpga_driver/xilinx_vc709/vc709_fpga.h"
+#include "vc709_fpga.h"
 /*
  * Return the uioX char device used for a pci device. On success, return
  * the UIO number and fill dstbuf string with the path of the device in

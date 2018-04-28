@@ -4,7 +4,6 @@
  *  Created on: Jun 20, 2017
  *      Author: root
  */
-#include "../../fpga_drivers/xilinx_vc709/vc709_rxtx.h"
 
 #include <sys/queue.h>
 
@@ -28,15 +27,17 @@
 
 #include <dhl_fpga.h>
 
-#include "../../fpga_driver/xilinx_vc709/dma/xdma.h"
-#include "../../fpga_driver/xilinx_vc709/dma/xdma_bd.h"
-#include "../../fpga_driver/xilinx_vc709/dma/xdma_user.h"
-#include "../../fpga_drivers/xilinx_vc709/dma/xdma_hw.h"
-#include "../../fpga_drivers/xilinx_vc709/dma/xstatus.h"
-#include "../../fpga_drivers/xilinx_vc709/vc709_fpga.h"
-#include "../../fpga_drivers/xilinx_vc709/vc709_log.h"
-#include "../../fpga_drivers/xilinx_vc709/vc709_pci_uio.h"
-#include "../../fpga_drivers/xilinx_vc709/vc709_specific.h"
+#include "vc709_rxtx.h"
+
+#include "dma/xdma.h"
+#include "dma/xdma_bd.h"
+#include "dma/xdma_user.h"
+#include "dma/xdma_hw.h"
+#include "dma/xstatus.h"
+#include "vc709_fpga.h"
+#include "vc709_log.h"
+#include "vc709_pci_uio.h"
+#include "vc709_specific.h"
 
 #if 1
 #define RTE_PMD_USE_PREFETCH

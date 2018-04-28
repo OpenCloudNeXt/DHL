@@ -2,14 +2,14 @@
 
 /***************************** Include Files *********************************/
 
-#include "../../../fpga_drivers/xilinx_vc709/dma/xdma.h"
+#include "xdma.h"
 
 #include <linux/string.h>
 #include <linux/kernel.h>
 
-#include "../../../fpga_drivers/xilinx_vc709/dma/xdma_hw.h"
-#include "../../../fpga_drivers/xilinx_vc709/dma/xstatus.h"
-#include "../../../fpga_drivers/xilinx_vc709/vc709_log.h"
+#include "xdma_hw.h"
+#include "xstatus.h"
+#include "../vc709_log.h"
 
 
 /*****************************************************************************/

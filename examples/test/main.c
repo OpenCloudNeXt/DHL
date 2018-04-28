@@ -48,7 +48,7 @@
 #include <rte_debug.h>
 #include <rte_mbuf.h>
 
-#include "dhl_nflib.h"
+#include "dhl_nf.h"
 #include "dhl_pkt_print.h"
 
 

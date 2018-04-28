@@ -208,7 +208,7 @@ extern "C" {
 
 	/***************************** Include Files *********************************/
 
-#include "../../../fpga_drivers/xilinx_vc709/dma/xpmon_be.h"
+#include "xpmon_be.h"
 #include <linux/ethtool.h>
 
 

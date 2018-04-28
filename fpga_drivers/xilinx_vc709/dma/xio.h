@@ -74,9 +74,9 @@ extern "C" {
 
 	/***************************** Include Files *********************************/
 
-#include "../../../fpga_drivers/xilinx_vc709/dma/xbasic_types.h"
+#include "xbasic_types.h"
 // include u8 u16 u 32
-#include "../../../fpga_drivers/xilinx_vc709/vc709_type.h"
+#include "../vc709_type.h"
 
 
 	/************************** Constant Definitions *****************************/

@@ -66,7 +66,7 @@
 
 /***************************** Include Files *********************************/
 
-#include "../../../fpga_drivers/xilinx_vc709/dma/xdma_bdring.h"
+#include "xdma_bdring.h"
 
 #include <linux/string.h>
 #include <linux/ethtool.h>
@@ -74,11 +74,11 @@
 #include <rte_common.h>
 #include <rte_log.h>
 
-#include "../../../fpga_driver/xilinx_vc709/dma/xbasic_types.h"
-#include "../../../fpga_driver/xilinx_vc709/dma/xio.h"
-#include "../../../fpga_drivers/xilinx_vc709/dma/xdma_hw.h"
-#include "../../../fpga_drivers/xilinx_vc709/dma/xstatus.h"
-#include "../../../fpga_drivers/xilinx_vc709/vc709_log.h"
+#include "xbasic_types.h"
+#include "xio.h"
+#include "xdma_hw.h"
+#include "xstatus.h"
+#include "../vc709_log.h"
 #include "../vc709_type.h"
 
 

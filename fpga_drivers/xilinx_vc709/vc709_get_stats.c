@@ -4,17 +4,20 @@
  *  Created on: Jul 4, 2017
  *      Author: root
  */
-#include "../../fpga_drivers/xilinx_vc709/vc709_get_stats.h"
-
 #include <rte_common.h>
 #include <dhl_fpga.h>
 
-#include "../../fpga_driver/xilinx_vc709/dma/xdma_user.h"
-#include "../../fpga_driver/xilinx_vc709/dma/xpmon_be.h"
-#include "../../fpga_drivers/xilinx_vc709/dma/xdma.h"
-#include "../../fpga_drivers/xilinx_vc709/dma/xdma_hw.h"
-#include "../../fpga_drivers/xilinx_vc709/vc709_fpga.h"
-#include "../../fpga_drivers/xilinx_vc709/vc709_log.h"
+#include "dma/xpmon_be.h"
+#include "dma/xdma.h"
+#include "dma/xdma_user.h"
+#include "dma/xdma_hw.h"
+
+#include "vc709_get_stats.h"
+
+#include "vc709_fpga.h"
+#include "vc709_log.h"
+
+
 
 #define MULTIPLIER  8
 #define DIVISOR     (1024*1024*1024)    /* Graph is in Gbits/s */

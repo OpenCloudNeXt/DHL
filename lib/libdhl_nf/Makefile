@@ -8,7 +8,7 @@ CFLAGS += $(WERROR_FLAGS)
 LIBABIVER := 6
 
 # all source are stored in SRCS-y
-SRCS-y := dhl_nflib.c dhl_pkt_print.c
+SRCS-y := dhl_nf.c dhl_pkt_print.c
 
 #
 # Export include files
@@ -16,7 +16,7 @@ SRCS-y := dhl_nflib.c dhl_pkt_print.c
 SYMLINK-y-include += dhl_common.h
 SYMLINK-y-include += dhl_includes.h
 SYMLINK-y-include += dhl_msg_common.h
-SYMLINK-y-include += dhl_nflib.h
+SYMLINK-y-include += dhl_nf.h
 SYMLINK-y-include += dhl_pkt_common.h
 SYMLINK-y-include += dhl_pkt_print.h
 

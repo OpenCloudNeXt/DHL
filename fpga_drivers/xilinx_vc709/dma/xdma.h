@@ -14,10 +14,10 @@
 
 	/***************************** Include Files *********************************/
 
-#include "../../../fpga_drivers/xilinx_vc709/dma/xdma_bdring.h"
-#include "../../../fpga_drivers/xilinx_vc709/dma/xdma_user.h"
-#include "../../../fpga_driver/xilinx_vc709/dma/xpmon_be.h"
-#include "../../../fpga_driver/xilinx_vc709/dma/xbasic_types.h"
+#include "xdma_bdring.h"
+#include "xdma_user.h"
+#include "xpmon_be.h"
+#include "xbasic_types.h"
 
 
 	/************************** Constant Definitions *****************************/
