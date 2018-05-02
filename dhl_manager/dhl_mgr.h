@@ -23,6 +23,7 @@
 #include <rte_memcpy.h>
 #include <rte_malloc.h>
 #include <rte_fbk_hash.h>
+#include <rte_prefetch.h>
 
 /********************************DHL library*********************************/
 #include <dhl_fpga.h>
@@ -63,6 +64,14 @@
 
 #define MAX_NF_INSTANCE_ID 65535
 
+
+#if MGR_PREFETCH_ENABLE
+#define MGR_PREFETCH0(p)	rte_prefetch0(p)
+#define MGR_PREFETCH1(p)	rte_prefetch1(p)
+#else
+#define MGR_PREFETCH0(p)
+#define MGR_PREFETCH1(p))
+#endif
 /*******************************Data Structures*******************************/
 struct worker_lcores {
 	uint8_t num;

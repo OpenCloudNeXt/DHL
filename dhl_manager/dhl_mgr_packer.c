@@ -4,6 +4,13 @@
  *  Created on: Apr 9, 2018
  *      Author: lxy
  */
+#ifndef MGR_PREFETCH_ENABLE
+#define MGR_PREFETCH_ENABLE   1
+#endif
+
+#include <rte_mbuf.h>
+#include <rte_branch_prediction.h>
+
 #include "dhl_mgr.h"
 #include "dhl_mgr_stats.h"
 
@@ -22,11 +29,12 @@ packer_thread_main(__attribute__((unused)) void * dummy) {
 	struct packer_thread * thread = NULL;
 	struct rte_ring * ibq = NULL;
 
-	void * pkts[IBQ_DEQUEUE_PKTS];
+	struct rte_mbuf * pkts[IBQ_DEQUEUE_PKTS];
 	struct rte_mbuf * pkt;
 	int num_pkts = 0;
 
 	struct packer * packer = &manager.packer;
+	uint32_t bsz_out = manager.burst_size_ibq_out;
 
 	cur_lcore = rte_lcore_id();
 	for (i = 0; i < packer->num_thread; i++){
@@ -51,12 +59,37 @@ packer_thread_main(__attribute__((unused)) void * dummy) {
 			}
 
 			while(manager.worker_keep_running) {
-				num_pkts = rte_ring_count(thread->ibq);
-				if(num_pkts < IBQ_DEQUEUE_PKTS)
+				num_pkts = rte_ring_sc_dequeue_bulk(
+						ibq,
+						(void **) pkts,
+						bsz_out,
+						NULL);
+
+				if (unlikely(num_pkts == 0))
 					continue;
 
-				if(rte_ring_dequeue_bulk(ibq, pkts, IBQ_DEQUEUE_PKTS, NULL) == 0)
-					continue;
+				MGR_PREFETCH1(rte_pktmbuf_mtod(pkts[0], unsigned char *));
+				MGR_PREFETCH0(pkts[1]);
+
+				for (j = 0; j < bsz_out; j++) {
+					struct rte_mbuf * pkt;
+
+					if (likely( j < bsz_out - 1)) {
+						MGR_PREFETCH1( rte_pktmbuf_mtod(pkts[j+1], unsigned char *));
+					}
+					if (likely( j < bsz_out - 2)) {
+						MGR_PREFETCH0(pkts[j+2]);
+					}
+
+					pkt = pkts[j];
+
+					// packer needs to pack packets in terms of their acc_id
+					// TO DO
+					// put them in to different groups
+
+
+				}
+
 
 				for(j = 0; j < IBQ_DEQUEUE_PKTS; j++) {
 					pkt = (struct rte_mbuf *)pkts[j];

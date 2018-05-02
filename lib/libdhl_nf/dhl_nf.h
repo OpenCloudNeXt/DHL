@@ -53,8 +53,8 @@ int
 dhl_configure_accelerator(int acc_id);
 
 int
-dhl_send_packets(struct rte_mbuf * packets);
+dhl_send_packets(void * const *obj_table, unsigned int n, uint16_t nf_id, uint16_t acc_id);
 
 int
-dhl_get_packets(struct rte_mbuf ** packets);
+dhl_get_packets(void **obj_table, unsigned int n);
 #endif /* DHL_NFLIB_DHL_NFLIB_H_ */
