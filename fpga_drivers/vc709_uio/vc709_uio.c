@@ -424,7 +424,27 @@ vc709_uio_pci_remove(struct pci_dev * pdev)
 }
 
 static struct pci_driver vc709_uio_pci_driver = {
-		.name = "vc709_uio",
+		/* Initialy we named this uio driver as "vc709_uio". When performing the rte_eal_init(), there is one step
+		 * that calls the rte_bus_scan(). When scanning the pci bus in rte_bus_scan(), it calls pci_scan_one("/sys/bus/pci/devices", addr)
+		 * to scan all the pci devices in the system, creates a "struct rte_pci_device" for each pci device, set the field of "rte_pci_device->kdrv"
+		 * based on the driver name, which is exactly "vc709_uio" when loading this uio driver into kernel and it matches the vc709 in pci bus.
+		 *
+		 * In order to make the DPDK EAL probe Xilinx vc709 board properly, we need to add one type of "enum rte_kernel_driver" named
+		 * RTE_KDRV_VC709_UIO in "rte_bus_pci.h", and accordingly add some few codes to make it correctly probe the vc709 board when performing
+		 * rte_pci_map_device() & rte_pci_unmap_device() to map/unmap the device resources into/from userspace.
+		 *
+		 * However, the initial method needs to modify the source code of DPDK.
+		 * In order not to issue any modification, we take a tricky that naming this uio driver as "uio_pci_generic", so that it will
+		 * set the rte_pci_device->kdrv as RTE_KDRV_UIO_GENERIC when scanning at vc709 board.
+		 *
+		 * Because that the DMA engines ues the 32-bits dma address and the DPDK returns the 64-bits physical address in user space,
+		 * we need this uio driver to allocate the io memory for buffer descriptors of the DMA engines in descriptor_init(),
+		 * and stores the address space of them in "struct uio_info->mem[]" for the vc709_pmd_driver to use.
+		 *
+		 * When we update the DMA IP core in FPGA to support 64-bits DMA address, we can use the igb_uio driver instead of this.
+		 */
+//		.name = "vc709_uio",
+		.name = "uio_pci_generic",
 		.id_table = ids,
 		.probe = vc709_uio_pci_probe,
 		.remove = vc709_uio_pci_remove,

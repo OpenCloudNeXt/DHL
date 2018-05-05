@@ -396,4 +396,4 @@ static struct rte_pci_driver dhl_vc709_pmd = {
 
 RTE_PMD_REGISTER_PCI(fpga_vc709, dhl_vc709_pmd);
 RTE_PMD_REGISTER_PCI_TABLE(fpga_vc709, pci_id_vc709_map);
-RTE_PMD_REGISTER_KMOD_DEP(fpga_vc709, "* vc709_uio");
+RTE_PMD_REGISTER_KMOD_DEP(fpga_vc709, "* uio_pci_generic");
