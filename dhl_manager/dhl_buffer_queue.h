@@ -11,21 +11,21 @@
 #include <sys/queue.h>
 
 /* Bursts */
-#ifndef BQ_MBUF_ARRAY_SIZE
-#define BQ_MBUF_ARRAY_SIZE 512
+#ifndef DHL_BQ_MBUF_ARRAY_SIZE
+#define DHL_BQ_MBUF_ARRAY_SIZE 512
 #endif
 
 #ifndef BQ_DEFAULT_BURST_SIZE_IBQ_OUT
 #define BQ_DEFAULT_BURST_SIZE_IBQ_OUT  144
 #endif
-#if (BQ_DEFAULT_BURST_SIZE_IBQ_OUT > BQ_MBUF_ARRAY_SIZE)
+#if (BQ_DEFAULT_BURST_SIZE_IBQ_OUT > DHL_BQ_MBUF_ARRAY_SIZE)
 #error "BQ_DEFAULT_BURST_SIZE_IBQ_OUT is too big"
 #endif
 
 #ifndef BQ_DEFAULT_BURST_SIZE_OBQ_OUT
 #define BQ_DEFAULT_BURST_SIZE_OBQ_OUT  144
 #endif
-#if (BQ_DEFAULT_BURST_SIZE_OBQ_OUT > BQ_MBUF_ARRAY_SIZE)
+#if (BQ_DEFAULT_BURST_SIZE_OBQ_OUT > DHL_BQ_MBUF_ARRAY_SIZE)
 #error "BQ_DEFAULT_BURST_SIZE_OBQ_OUT is too big"
 #endif
 
@@ -47,7 +47,7 @@
 
 
 struct bq_mbuf_array {
-	struct rte_mbuf * array[BQ_MBUF_ARRAY_SIZE];
+	struct rte_mbuf * array[DHL_BQ_MBUF_ARRAY_SIZE];
 	uint32_t n_mbufs;
 };
 
@@ -55,7 +55,11 @@ struct bq_mbuf_array {
 struct dhl_bq {
 	uint16_t id;
 	unsigned socket_id;
-	struct rte_ring * bq;
+	struct rte_ring * ring;
+
+	/* Internal buffers */
+	struct bq_mbuf_array mbuf_in;
+	struct bq_mbuf_array mbuf_out;
 
 	TAILQ_ENTRY(dhl_bq) next;			/** <Next buffer queue in linked lists */
 };

@@ -41,7 +41,7 @@ dhl_assign_obq_to_distributor_thread();
 
 static inline struct dhl_bq * dhl_bq_copy(struct dhl_bq * bq) {
 	struct dhl_bq * new_bq = (struct dhl_bq *)malloc(sizeof(struct dhl_bq));
-	new_bq->bq = bq->bq;
+	new_bq->ring = bq->ring;
 	new_bq->id = bq->id;
 	new_bq->socket_id = bq->socket_id;
 //	new_bq->next = NULL;
@@ -242,7 +242,7 @@ dhl_get_shared_ibq(struct dhl_nf_info * nf_info) {
 		thread = packer->packer_thread + i;
 		socket_id = thread->socket_id;
 		if(socket_id == nf_socket_id) {
-			ibq = thread->ibq;
+			ibq = thread->bq->ring;
 			break;
 		}
 	}
@@ -300,7 +300,7 @@ dhl_create_obq(struct dhl_nf_info * nf_info) {
 
 	buffer_queue->id = nf_id;
 	buffer_queue->socket_id = nf_socket_id;
-	buffer_queue->bq = obq;
+	buffer_queue->ring = obq;
 
 	if(dhl_assign_obq_to_distributor_thread(buffer_queue)) {
 		nf_info->status = NF_MEMORY_FAILED;

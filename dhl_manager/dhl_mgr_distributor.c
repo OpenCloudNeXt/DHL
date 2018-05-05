@@ -16,23 +16,22 @@
  */
 int
 distributor_thread_main(__attribute__((unused)) void * dummy) {
-	unsigned i, j, cur_lcore;
+	unsigned i, j;
+	unsigned cur_lcore;
 	struct distributor_thread * thread = NULL;
+
+	struct distributor * distributor = &manager.distributor;
+	uint32_t bsz_in = manager.burst_size_obq_in;
 
 	struct dhl_bq * obq = NULL;
 
-	void * pkts[IBQ_DEQUEUE_PKTS];
-	struct rte_mbuf * pkt;
-	int num_pkts = 0;
 
 	cur_lcore = rte_lcore_id();
-
-	struct distributor * distributor = &manager.distributor;
 	for (i = 0; i < distributor->num_thread; i++) {
 		thread = distributor->distributor_thread + i;
 
 		if(thread == NULL) {
-			RTE_LOG(ERR, MANAGER, "Getting distributor_thread is NULL, when distributor thread %d running at lcore %d.\n",
+			RTE_LOG(ERR, MANAGER, "Getting distributor_thread is NULL, while distributor thread %d running at lcore %d.\n",
 					i, cur_lcore);
 			return -1;
 		}
@@ -43,14 +42,24 @@ distributor_thread_main(__attribute__((unused)) void * dummy) {
 			RTE_LOG(INFO, MANAGER, "Distributor thread %d is running at lcore %d in socket %d.\n",
 					thread->id, cur_lcore, thread->socket_id);
 
+			struct rte_ring * obq;
+			struct rte_mbuf * pkt;
+			uint32_t n_mbufs, n_pkts;
+
+#ifdef VIRTUAL_CHANNEL
+			struct rte_mbuf * pkts[VIRTUAL_CHANNEL_DEQUEUE_BURST];
+#endif
+
 			while(manager.worker_keep_running) {
-				num_pkts = rte_ring_count(manager.virtual_channel);
+#ifdef VIRTUAL_CHANNEL
+				n_pkts = rte_ring_count(manager.virtual_channel);
 
-				if(num_pkts < IBQ_DEQUEUE_PKTS)
+				if(n_pkts < VIRTUAL_CHANNEL_DEQUEUE_BURST)
 					continue;
 
-				if(rte_ring_dequeue_bulk(manager.virtual_channel, pkts, IBQ_DEQUEUE_PKTS, NULL) == 0)
+				if(rte_ring_dequeue_bulk(manager.virtual_channel, pkts, VIRTUAL_CHANNEL_DEQUEUE_BURST, NULL) == 0)
 					continue;
+#else
 
 				obq = (struct dhl_bq *)TAILQ_FIRST(&thread->obqs);
 
@@ -67,6 +76,7 @@ distributor_thread_main(__attribute__((unused)) void * dummy) {
 					print_pkt_no_check(pkt);
 					rte_ring_enqueue(obq->bq, (void *)pkt);
 				}
+#endif
 			}
 
 		}

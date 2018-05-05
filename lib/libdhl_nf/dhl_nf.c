@@ -179,12 +179,12 @@ dhl_configure_accelerator(int acc_id __rte_unused) {
 }
 
 int
-dhl_send_packets(void * const *obj_table, unsigned int n, uint16_t nf_id, uint16_t acc_id){
+dhl_send_packets(uint16_t nf_id, uint16_t acc_id, void * const *obj_table, unsigned int n){
 	return 0;
 }
 
 int
-dhl_get_packets(void **obj_table, unsigned int n){
+dhl_get_packets(uint16_t nf_id, void **obj_table, unsigned int n){
 	return 0;
 }
 

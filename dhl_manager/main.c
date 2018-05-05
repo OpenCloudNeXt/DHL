@@ -100,12 +100,8 @@ main(int argc, char ** argv) {
 	int ret;
 	unsigned cur_lcore, lcore_id;
 
-	/* Reserve ID 0 for internal manager things */
-	manager.next_nf_instance_id = 1;
-
-	// Start the DHL manger with 0 NF registered
-	manager.num_registered_nfs = 0;
-
+	manager.num_registered_nfs = 0;		/* Start the DHL manger with 0 NF registered */
+	manager.next_nf_instance_id = 1;	/* Reserve ID 0 for internal manager things */
 	manager.main_keep_running = true;
 	manager.worker_keep_running = true;
 
@@ -141,7 +137,6 @@ main(int argc, char ** argv) {
 	}
 
 	/* Master thread handles statistics and NF management */
-//	rte_eal_remote_launch(master_thread_main, NULL, CALL_MASTER);
 	master_thread_main();
 
 

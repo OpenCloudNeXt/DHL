@@ -38,7 +38,7 @@ const char *progname;
 
 
 int
-parse_manager_args(uint8_t max_fpgas, int argc, char * argv[]) {
+parse_manager_args(int argc, char * argv[]) {
 	int opt, ret;
 	char ** argvopt;
 	int option_index;

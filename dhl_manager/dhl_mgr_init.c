@@ -16,6 +16,15 @@
 #define PACKER_THREAD_ZONE_NAME "manager_packer_threads"
 #define DISTRIBUTOR_THREAD_ZONE_NAME "manager_distributor_threads"
 
+#define MBUF_FPGA_CACHE_SIZE 256
+
+const int mbuf_dataroom = 2048;
+
+const struct dhl_fpga_conf fpga_conf = {
+		.rx_buf_size = mbuf_dataroom,
+		.max_batching_size = MAX_BATCHING_SIZE,
+		.per_packet_size = PER_PACKET_SIZE,
+};
 
 /********************************Global variables*****************************/
 /* global variable for number of currently active NFs - extern in header dhl_init.h */
@@ -23,6 +32,56 @@
 
 
 /*****************************Internal functions******************************/
+static int
+init_fpga_cards(void) {
+	int ret;
+	uint8_t fpgaid;
+	int nb_fpga_cards;
+	struct rte_mempool * mbuf_pool_fpga;
+	unsigned int socket_id;
+
+	/* get total number of fpga boards in the system */
+	nb_fpga_cards = dhl_fpga_dev_count();
+
+	if (nb_fpga_cards == 0) {
+		RTE_LOG(ERR, MANAGER, "\nThere is no FPGA cards plugged in the PCIe slot.\n");
+		return -1;
+	}else if (nb_fpga_cards > MAX_FPGA_CARDS) {
+		RTE_LOG(ERR, MANAGER,
+				"\nThe total number of FPGA cards is %d, "
+				"which exceeds the ability of DHL Managet to manage. "
+				"Please re-compile the DHL Manager with a bigger CONFIG_MAX_FPGA_CARDS in the config file.\n ",
+				nb_fpga_cards);
+		return -2;
+	}
+	RTE_LOG(INFO, MANAGER, "\nThere are %d FPGA cards in the system.\n", nb_fpga_cards );
+	manager.num_fpgas = nb_fpga_cards;
+
+
+	for (fpgaid = 0; fpgaid < nb_fpga_cards; fpgaid++) {
+		socket_id = dhl_fpga_dev_socket_id(fpgaid);
+		mbuf_pool_fpga = rte_pktmbuf_pool_create(get_mbuf_pool_fpga_name(fpgaid),
+				NUM_BD * 2 * DMA_ENGINES, MBUF_FPGA_CACHE_SIZE, 0,
+				MAX_BATCHING_SIZE + DHL_PKTMBUF_FPGA_HEADROOM, socket_id);
+		if (mbuf_pool_fpga == NULL) {
+			RTE_LOG(ERR, MANAGER, "Cannot create mbuf pool for FPGA card %i.\n", fpgaid);
+			return -3;
+		}
+
+		ret = dhl_fpga_dev_configure (fpgaid, NUM_BD, socket_id, mbuf_pool_fpga, &fpga_conf);
+		if (ret < 0) {
+			RTE_LOG (ERR, MANAGER, "Error of configuring the FPGA card %d.\n", fpgaid);
+			return ret;
+		}
+
+		manager.mbuf_pool_fpga[fpgaid] = mbuf_pool_fpga;
+	}
+
+	return 0;
+}
+
+
+
 static int
 init_packer(void) {
 	unsigned i, j;
@@ -101,8 +160,8 @@ init_shared_ibqs(void){
 	unsigned i,j;
 	const char * ibq_name;
 	unsigned socket_id;
-	struct rte_ring * ibq;
-//	struct dhl_bq * buffer_queue;
+	struct rte_ring * ibq_ring;
+	struct dhl_bq * buffer_queue;
 
 	unsigned count;
 	const unsigned ringsize = IBQ_QUEUE_SIZE;
@@ -115,54 +174,30 @@ init_shared_ibqs(void){
 		socket_id = fpgas->socket_id[i];
 
 		ibq_name = get_input_buffer_queue_name(socket_id);
-		ibq = rte_ring_create(ibq_name,
+		ibq_ring = rte_ring_create(ibq_name,
 				ringsize, socket_id, RING_F_SC_DEQ);
 
-		if(ibq == NULL) {
+		if(ibq_ring == NULL) {
 			RTE_LOG(ERR, MANAGER, "Cannot create shared input buffer queue for socket %u.\n", socket_id);
 			return -1;
 		}
 
-//		buffer_queue = malloc(sizeof(*buffer_queue));
-//		if(buffer_queue == NULL) {
-//			RTE_LOG(ERR, MANAGER, "Cannot allocate memory for buffer queue structure.\n");
-//			return -1;
-//		}
-//
-//		buffer_queue->id = i;
-//		buffer_queue->socket_id = socket_id;
-//		buffer_queue->bq = ibq;
+		/* create struct dhl_bq for this ibq */
+		buffer_queue = malloc(sizeof(*buffer_queue));
+		if(buffer_queue == NULL) {
+			RTE_LOG(ERR, MANAGER, "Cannot allocate memory for buffer queue structure.\n");
+			return -1;
+		}
 
-//		if (TAILQ_EMPTY(&ibq_list)) {
-//			TAILQ_INSERT_TAIL(&ibq_list, buffer_queue, next);
-//			RTE_LOG(INFO, MANAGER, "Create ibq %s(id:%d) for socket %d.\n",ibq_name, i,socket_id);
-//		} else {
-//			struct dhl_bq * buffer_queue2 = NULL;
-//			int inserted = 0;
-//
-//			FOREACH_IBQ(buffer_queue2) {
-//				if(buffer_queue->id > buffer_queue2->id){
-//					continue;
-//				} else if(buffer_queue->id < buffer_queue2->id){
-//					TAILQ_INSERT_BEFORE(buffer_queue2, buffer_queue, next);
-//					inserted = 1;
-//					RTE_LOG(INFO, MANAGER, "Create ibq %s(id:%d) for socket %d.\n",ibq_name, i,socket_id);
-//				} else { /*already created*/
-//					inserted = 1;
-//					//do nothing
-//				}
-//			}
-//
-//			if(!inserted) {
-//				TAILQ_INSERT_TAIL(&ibq_list, buffer_queue, next);
-//				RTE_LOG(INFO, MANAGER, "Create ibq %s(id:%d) for socket %d.\n",ibq_name, i,socket_id);
-//			}
-//		}
+		buffer_queue->id = i;
+		buffer_queue->socket_id = socket_id;
+		buffer_queue->ring = ibq_ring;
 
+		/* assign the created dhl_bq to its packer_thread, according to their socket_id */
 		count = 0;
 		for(j = 0; j < packer->num_thread; j++) {
 			if(packer->packer_thread[j].socket_id == socket_id) {
-				packer->packer_thread[j].ibq = ibq;
+				packer->packer_thread[j].bq = buffer_queue;
 				count ++;
 			}
 		}
@@ -294,6 +329,7 @@ init_message_queue(void)
 }
 
 
+#ifdef VIRTUAL_CHANNEL
 static int
 init_virtual_channel(void)
 {
@@ -307,14 +343,13 @@ init_virtual_channel(void)
 
 	return 0;
 }
-
+#endif
 
 /*********************************Interfaces**********************************/
 
 int
 init(int argc, char * argv[] ) {
 	int retval;
-	int total_fpgas;
 	const struct rte_memzone *mz_nf;
 
 	/* init EAL, parsing EAL args */
@@ -324,11 +359,22 @@ init(int argc, char * argv[] ) {
 	argc -= retval;
 	argv += retval;
 
-	/* get total number of fpga boards in the system */
-	total_fpgas = dhl_fpga_dev_count();
-	printf("\n");
-		RTE_LOG(INFO, MANAGER, "There are %d FPGA cards in the system.\n", total_fpgas );
-	manager.num_fpgas = total_fpgas;
+	retval = dhl_init();
+	if ( retval < 0)
+		return -1;
+	argc -= retval;
+	argv += retval;
+
+	/* parse application specific arguments */
+	retval = parse_manager_args(argc, argv);
+	if (retval != 0)
+		return -1;
+
+	/* After initialize the environment of DPDK Runtime and parsing the manager arguments, it should initialize all the FPGA cards immediately */
+	retval = init_fpga_cards();
+	if (retval != 0) {
+		rte_exit(EXIT_FAILURE, "Cannot initialize FPGA cards.\n");
+	}
 
 	/* set up array for NFs */
 	mz_nf = rte_memzone_reserve(MZ_MANAGER_NF_INFO, sizeof(struct dhl_nf) * MAX_NFS, rte_socket_id(), NO_FLAGS);
@@ -340,13 +386,10 @@ init(int argc, char * argv[] ) {
 		manager.nfs = mz_nf->addr;
 	}
 
-	/* parse application specific arguments */
-	retval = parse_manager_args(total_fpgas, argc, argv);
-	if (retval != 0)
-		return -1;
+
 
 	/* initialise fpga info */
-//	init_fpga_info(total_fpgas);
+//	init_fpga_info(nb_fpga_cards);
 	init_fake_fpga_info();
 
 	/* initialise packer */

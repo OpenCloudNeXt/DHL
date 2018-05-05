@@ -1,0 +1,4 @@
+#
+# define the dequeue size of shared input buffer queues of PACKER
+#
+CONFIG_DHL_BQ_MBUF_ARRAY_SIZE=512
