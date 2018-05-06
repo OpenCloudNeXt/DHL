@@ -18,10 +18,12 @@ To install DHL, please see the [DHL Installation][install] guide for a specific 
 
 # Using DHL framework
 1. Software NF developing
+
 	DHL comes with several [sample network functions][examples]. 
 	To get started with these examples, please see the [Example Uses][examples_doc] guide.
 	
 2. Hardware Accelerator module developing
+
 	There are two pre-designed hardware accelerator modules (ipsec-crypto and pattern-matching) along with DHL framework. 
 	Of course, you can customize your own accelerator module based on the requirement of your software NF. 
 	Please see the [Customizing Hardware Accelerator][customizing_hw_acc] guide for detailed information.
