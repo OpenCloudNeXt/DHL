@@ -58,7 +58,7 @@ For the time being, we haven't tested on other Linux distributions, e.g. Ubuntu,
 	```
 
 4. Set environment variable DPDK_INSTALL_DIR to the path that will hold the compiled DPDK SDK.
-	Make sure you are in the directory containning DPDK, not in the DPDK directory.
+	Make sure you are in the directory containing DPDK, not in the DPDK directory.
 	```sh
 	echo export DPDK_INSTALL_DIR=$(pwd)/${DPDK_VERSION}-install >> ~/.bashrc
 
