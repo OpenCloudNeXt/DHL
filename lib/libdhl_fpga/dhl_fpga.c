@@ -20,12 +20,15 @@
 #include <rte_debug.h>
 
 #include "dhl_fpga.h"
+#include "dhl_fpgadev_core.h"
+
 
 static const char *MZ_DHL_FPGA_DEV_DATA = "dhl_fpga_dev_data";
 struct dhl_fpga_dev dhl_fpga_devices[DHL_MAX_FPGA_CARDS];
-static struct dhl_fpga_dev_data * dhl_fpga_dev_data;
 static uint8_t fpga_dev_last_created_card;
 static uint8_t nb_fpga_cards;
+
+static struct dhl_fpga_dev_data * dhl_fpga_dev_data;
 
 const struct dhl_fpga_rxconf default_rxconf = {
 		.rx_drop_en = 0,

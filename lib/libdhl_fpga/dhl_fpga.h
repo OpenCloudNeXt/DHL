@@ -29,14 +29,12 @@ extern "C" {
 #define DHL_MAX_RING_DESC 2048
 #define DHL_MAX_ENGINE_PER_FPGA	4
 
-
 /**
  * RX/TX engine states
  */
 #define DHL_FPGA_ENGINE_STATE_STOPPED 0
 #define DHL_FPGA_ENGINE_STATE_STARTED 1
 
-struct dhl_fpga_dev;
 
 /* Macros to check for valid fpga card */
 #define DHL_FPGA_VALID_CARDID_OR_ERR_RET(card_id, retval) do { \
@@ -69,6 +67,15 @@ struct dhl_fpga_dev;
 } while (0)
 
 #define DHL_FPGA_DEV_TO_PCI(fpga_dev)	RTE_DEV_TO_PCI((fpga_dev)->device)
+
+
+/**
+ * A set of values to describe the possible states of an FPGA device.
+ */
+enum dhl_fpga_dev_state {
+	DHL_FPGA_DEV_UNUSED = 0,
+	DHL_FPGA_DEV_ATTACHED,
+};
 
 /*
  * A structure used to configure an Rx engine of an FPGA card
@@ -104,194 +111,7 @@ struct dhl_fpga_stats {
 	float throughput;
 };
 
-/*
- * Definitions of all functions exported by an FPGA driver through the
- * generic structure of type *fpga_dev_ops* supplied in the *dhl_fpga_dev*->dev_ops
- * structure associated with an FPGA device.
- */
-/**< @internal FPGA device configuration. */
-typedef int (*fpga_dev_configure_t)(struct dhl_fpga_dev *dev);
 
-/**< @internal Function used to start a configured FPGA device. */
-typedef int  (*fpga_dev_start_t)(struct dhl_fpga_dev *dev);
-
-/**< @internal Function used to stop a configured FPGA device. */
-typedef int (*fpga_dev_stop_t)(struct dhl_fpga_dev *dev);
-
-/**< @internal Function used to close a configured FPGA device. */
-typedef void (*fpga_dev_close_t)(struct dhl_fpga_dev *dev);
-
-/** **/
-typedef int (*fpga_dev_setup_encap_pkts_pool_t)(struct dhl_fpga_dev *dev, uint32_t nb_dma_bd, unsigned int socket_id);
-
-
-
-/**< @internal Start rx and tx of a queue of an Ethernet device. */
-typedef int (*fpga_engine_start_t)(struct dhl_fpga_dev *dev,
-				    uint16_t engine_id);
-
-/**< @internal Stop rx and tx of a queue of an Ethernet device. */
-typedef int (*fpga_engine_stop_t)(struct dhl_fpga_dev *dev,
-				    uint16_t engine_id);
-
-/**< @internal Set up a receive queue of an Ethernet device. */
-typedef int (*fpga_rx_engine_setup_t)(struct dhl_fpga_dev *dev,
-				    uint16_t sw_engine_id,
-				    uint16_t nb_desc,
-				    unsigned int socket_id,
-				    const struct dhl_fpga_rxconf *rx_conf,
-				    struct rte_mempool *mb_pool);
-
-/**< @internal Setup a transmit queue of an Ethernet device. */
-typedef int (*fpga_tx_engine_setup_t)(struct dhl_fpga_dev *dev,
-				    uint16_t sw_engine_id,
-				    uint16_t nb_desc,
-				    unsigned int socket_id,
-				    const struct dhl_fpga_txconf *tx_conf);
-
-/**< @internal Release memory resources allocated by given RX/TX engine. */
-typedef void (*fpga_engine_release_t)(struct dhl_fpga_dev * dev, uint16_t engine_idx);
-
-
-
-typedef int (*fpga_dev_get_statics_t)(struct dhl_fpga_dev * dev, struct dhl_fpga_stats * stats, uint16_t num);
-
-typedef int (*fpga_dma_engine_start_t)(struct dhl_fpga_dev * dev, uint16_t engine_id);
-
-typedef int (*fpga_dma_engine_stop_t)(struct dhl_fpga_dev * dev, uint16_t engine_id);
-
-/**< @internal Set up a receive queue of an Ethernet device. */
-typedef int (*fpga_dma_engine_setup_t)(struct dhl_fpga_dev *dev,
-				    uint16_t engine_id,
-				    uint16_t nb_dma_bd,
-				    unsigned int socket_id,
-				    struct rte_mempool *mb_pool);
-
-
-typedef int (*fpga_dma_engine_release_t)(struct dhl_fpga_dev *dev,
-	    uint16_t engine_id);
-
-
-
-
-typedef int16_t (*fpga_rx_pkts_t)(struct dhl_fpga_dev *dev,
-		uint16_t eng_indx,
-		struct rte_mbuf **rx_pkts,
-		uint16_t numpkts);
-/**< @internal Retrieve input packets from a receive queue of an Ethernet device. */
-
-typedef int16_t (*fpga_tx_pkts_t)(struct dhl_fpga_dev *dev,
-		uint16_t eng_indx,
-		struct rte_mbuf **tx_pkts,
-		uint16_t numpkts);
-/**< @Send packets to a transmit DMA engine of an FPGA device. */
-
-
-/**
- * @internal A structure containing the functions exported by an FPGA driver.
- */
-struct fpga_dev_ops {
-	fpga_dev_configure_t		dev_configure;	   	/**< Configure device. */
-	fpga_dev_start_t            dev_start;     		/**< Start device. */
-	fpga_dev_stop_t             dev_stop;      		/**< Stop device. */
-	fpga_dev_close_t            dev_close;     		/**< Close device. */
-
-	fpga_rx_engine_setup_t       rx_engine_setup;	/**< Set up device RX engine. */
-	fpga_engine_start_t          rx_engine_start;	/**< Start RX for a engine. */
-	fpga_engine_stop_t           rx_engine_stop; 	/**< Stop RX for a engine. */
-	fpga_engine_release_t        rx_engine_release; /**< Release RX engine. */
-
-	fpga_tx_engine_setup_t       tx_engine_setup;	/**< Set up device TX engine. */
-	fpga_engine_start_t          tx_engine_start;	/**< Start TX for a engine. */
-	fpga_engine_stop_t           tx_engine_stop; 	/**< Stop TX for a engine. */
-	fpga_engine_release_t        tx_engine_release; /**< Release RX engine. */
-
-	fpga_dev_setup_encap_pkts_pool_t dev_setup_encap_pkts_pool;
-	fpga_dev_get_statics_t		dev_get_stats;
-};
-
-/**
- * A set of values to describe the possible states of an FPGA device.
- */
-enum dhl_fpga_dev_state {
-	DHL_FPGA_DEV_UNUSED = 0,
-	DHL_FPGA_DEV_ATTACHED,
-};
-
-/**
- * @internal
- * The generic data structure associated with each FPGA device.
- *
- * Pointers to burst-oriented packet receive and transmit functions are
- * located at the beginning of the structure, along with the pointer to
- * where all the data elements for the particular device are stored in shared
- * memory. This split allows the function pointer and driver data to be per-
- * process, while the actual configuration data for the device is shared.
- */
-struct dhl_fpga_dev {
-	fpga_rx_pkts_t rx_pkts; /**< Pointer to PMD receive function. */
-	fpga_rx_pkts_t rx_pkts_calc_latency;
-
-	fpga_tx_pkts_t tx_pkts; /**< Pointer to PMD transmit function. */
-	fpga_tx_pkts_t tx_pkts_noseg;
-	fpga_tx_pkts_t tx_pkts_noseg_add_timestamp;
-	fpga_tx_pkts_t tx_pkts_burst;
-
-	struct dhl_fpga_dev_data *data;  /**< Pointer to device data */
-	const struct fpga_dev_ops *dev_ops; /**< Functions exported by PMD */
-	struct rte_device *device; /**< Backing device */
-	struct rte_intr_handle *intr_handle; /**< Device interrupt handle */
-	/** User application callbacks for NIC interrupts */
-//	struct rte_eth_dev_cb_list link_intr_cbs;
-	enum dhl_fpga_dev_state state; /**< Flag indicating the port state */
-} __rte_cache_aligned;
-
-#define DHL_FPGA_NAME_MAX_LEN (32)
-
-/**
- * @internal
- * The data part, with no function pointers, associated with each FPGA device.
- *
- * This structure is safe to place in shared memory to be common among different
- * processes in a multi-process configuration.
- */
-struct dhl_fpga_dev_data {
-	char name[DHL_FPGA_NAME_MAX_LEN]; /**< Unique identifier name */
-
-	void ** rx_engines;	/**< Array of pointers to DMA rx engines. */
-	void ** tx_engines;	/**< Array of pointers to DMA tx engines. */
-	uint16_t nb_rx_engines;	/**< Number of RX engines. */
-	uint16_t nb_tx_engines; /**< Number of TX engines. */
-
-	void *dev_private;              /**< PMD-specific private data */
-
-	struct dhl_fpga_conf dev_conf; /**< Configuration applied to device. */
-
-	uint8_t card_id;           /**< Device [external] card identifier. */
-
-	__extension__
-	uint8_t promiscuous   : 1, /**< RX promiscuous mode ON(1) / OFF(0). */
-		scattered_rx : 1,  /**< RX of scattered packets is ON(1) / OFF(0) */
-		all_multicast : 1, /**< RX all multicast mode ON(1) / OFF(0). */
-		dev_started : 1,   /**< Device state: STARTED(1) / STOPPED(0). */
-		lro         : 1;   /**< RX LRO is ON(1) / OFF(0) */
-	uint8_t rx_engine_state[DHL_MAX_ENGINE_PER_FPGA];
-	/** Queues state: STARTED(1) / STOPPED(0) */
-	uint8_t tx_engine_state[DHL_MAX_ENGINE_PER_FPGA];
-	/** Queues state: STARTED(1) / STOPPED(0) */
-
-	uint32_t dev_flags; /**< Capabilities */
-	enum rte_kernel_driver kdrv;    /**< Kernel driver passthrough */
-	int numa_node;  /**< NUMA node connection */
-	const char *drv_name;   /**< Driver name */
-};
-
-/**
- * @internal
- * The pool of *dhl_fpga_dev* structures. The size of the pool
- * is configured at compile-time in the <dhl_fpga.c> file.
- */
-extern struct dhl_fpga_dev dhl_fpga_devices[];
 
 /********************* interfaces *********************************/
 

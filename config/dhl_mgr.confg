@@ -2,3 +2,9 @@
 # define the dequeue size of shared input buffer queues of PACKER
 #
 CONFIG_DHL_BQ_MBUF_ARRAY_SIZE=512
+
+
+# configurations of FPGA device
+CONFIG_DHL_MAX_FPGA_CARDS=4
+CONFIG_DHL_MAX_ENGINE_PER_FPGA=4
+
