@@ -42,14 +42,14 @@ For the time being, we haven't tested on other Linux distributions, e.g. Ubuntu,
 # Set up Enviroment	
 1. Set environment variable DPDK_VERSION which is the name of the DPDK directory, based on which DPDK version you downloaded.
 	```sh
-	echo export DPDK_VERSION=dpdk-18.02.1
-	#echo export DPDK_VERSION=dpdk-17.11.2
-	#echo export DPDK_VERSION=dpdk
+	echo export DPDK_VERSION=dpdk-18.02.1 >> ~/.bashrc
+	#echo export DPDK_VERSION=dpdk-17.11.2 >> ~/.bashrc
+	#echo export DPDK_VERSION=dpdk >> ~/.bashrc
 	```
 
 2. Set environment variable RTE_SDK to the path of the DPDK library.  Make sure that you are in the DPDK directory.
 	```sh
-	echo export RTE_SDK=$(pwd)/$(DPDK_VERSION) >> ~/.bashrc
+	echo export RTE_SDK=$(pwd)/${DPDK_VERSION} >> ~/.bashrc
 	```
 
 3. Set environment variable RTE_TARGET to the target architecture of your system.
@@ -76,7 +76,7 @@ For the time being, we haven't tested on other Linux distributions, e.g. Ubuntu,
 1. Run the [compile_dpdk script](../scripts/compile_dpdk.sh) to compile DPDK,
 	and it will install compiled DPDK SDK in `$(DPDK_INSTALL_DIR)`.
 	```
-	cd $(DHL_SDK)/scripts
+	cd ${DHL_SDK}/scripts
 	./compile_dpdk.sh
 	```
 	
@@ -87,7 +87,7 @@ For the time being, we haven't tested on other Linux distributions, e.g. Ubuntu,
 	For 1GB pages, it is not possible to reserve the hugepage memory after the system has booted.
 	We need to set the hugepages option to the kernel.
 
-	1. vim /boot/grubs/grub.cfg
+	1. vim /boot/grub2/grub.cfg
 
 		add these options after the `linux16 /vmlinuz-*.*.* ` command line.
 		`default_hugepagesz=1G hugepagesz=1G hugepages=4`
@@ -106,12 +106,12 @@ For the time being, we haven't tested on other Linux distributions, e.g. Ubuntu,
 # Comiple DHL
 1. Compile DHL ,including libdhl_fpga, fpga_drivers, dhl_manager and other libraries
 	```sh
-	cd $(DHL_SDK)
+	cd ${DHL_SDK}
 	make
 	```
 	
 2. Comiple example NFs
 	```sh
-	cd $(DHL_SDK)\examples
+	cd ${DHL_SDK}\examples
 	make
 	```
