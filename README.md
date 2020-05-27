@@ -44,7 +44,7 @@ _Please inform us if you use DHL in you research by [emailing us](mailto:fmliu@h
 
 [dhl]: http://opencloudnext.github.io/
 [dpdk]: http://dpdk.org/
-[icdcs2018]: http://grid.hust.edu.cn/fmliu/icdcs18-DHL-FPGA-FangmingLiu.pdf
+[icdcs2018]: https://fangmingliu.github.io/files/icdcs18-DHL-FPGA-FangmingLiu.pdf
 [install]: docs/Install.md
 [examples]: examples/
 [examples_doc]: docs/Examples.md
